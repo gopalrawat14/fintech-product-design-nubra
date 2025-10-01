@@ -55,3 +55,23 @@ The work reflects a **blend of product thinking, technical feasibility, and crea
 - Boosts **engagement (+40%)**, **retention (+25%)**, **revenue (+15%)**  
 
 ---
+
+## 📌 Learnings  
+
+💡 FinTech UX isn’t just about **design**, it’s about **reducing trust gaps**.  
+💡 Traders need **speed + clarity**; even 5-second friction can cause drop-offs.  
+💡 AI should act as a **partner, not a black box** — explainability is key.  
+
+---
+
+## 🤝 Connect & Collaborate  
+
+📧 gopalrawwatt@gmail.com  
+💼 [LinkedIn](https://www.linkedin.com/) *([Add your profile link here](https://www.linkedin.com/in/gopalrawat/))*  
+
+⭐ If you find this project insightful, consider starring the repo!  
+
+---
+
+### 🏆 Closing Note  
+This assignment demonstrates not only **feature design** but also **strategic product vision** — how Nubra can evolve into the platform that empowers manual traders to confidently transition into the world of **algorithmic trading**.  
