@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nubra Ultimate Trading Platform Model</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* I. Overall Platform Philosophy & Styling */
+        :root {
+            --bg-dark: #000000;
+            --bg-charcoal: #121212;
+            --accent-blue: #00FFFF; /* Electric Blue */
+            --accent-teal: #00E5FF; /* Vibrant Teal */
+            --secondary-gray: #A0A0A0; /* Silver/Light Gray */
+            --text-light: #FFFFFF;
+            --red: #FF4136;
+            --green: #2ECC40;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-charcoal);
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+        .card {
+            background-color: var(--bg-charcoal);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .accent-text {
+            color: var(--accent-teal);
+        }
+        .btn-primary {
+            background-color: var(--accent-blue);
+            color: var(--bg-charcoal);
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 10px var(--accent-blue);
+        }
+        .btn-secondary {
+            border: 1px solid var(--accent-teal);
+            color: var(--accent-teal);
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: rgba(0, 229, 255, 0.1);
+        }
+        /* Style for the Quick Modify Radial Menu (Hidden by default) */
+        #radial-menu {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: none; /* Controlled by JS */
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border: 2px solid var(--accent-teal);
+            z-index: 50;
+        }
+        .radial-menu-item {
+            font-size: 14px;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .radial-menu-item:hover {
+            color: var(--accent-teal);
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--accent-teal);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <!-- Header & Branding -->
+    <header class="flex justify-between items-center pb-4 mb-4 border-b border-gray-800">
+        <div class="text-2xl font-bold tracking-widest">
+            <span class="text-white">NU</span><span class="accent-text">BRA</span>
+        </div>
+        <nav class="flex space-x-6 text-sm text-gray-400">
+            <a href="#" class="accent-text border-b-2 border-transparent hover:border-current pb-1">Dashboard</a>
+            <a href="#" class="hover:text-white">Portfolio</a>
+            <a href="#" class="hover:text-white">Alerts</a>
+            <a href="#" class="hover:text-white" onclick="showOnboardingModal()">KYC/Onboarding (Test)</a>
+        </nav>
+    </header>
+
+    <!-- Main Dashboard Grid (Highly Modular Layout) -->
+    <main class="grid grid-cols-1 md:grid-cols-12 gap-4 h-[calc(100vh-100px)]">
+
+        <!-- Column 1: Watchlist Panel (2/12 Width) -->
+        <div class="col-span-12 md:col-span-2 overflow-y-auto">
+            <div class="card h-full">
+                <h2 class="text-xl font-semibold mb-3 border-b border-gray-800 pb-2">Watchlist</h2>
+                
+                <!-- Watchlist Items -->
+                <div class="space-y-3">
+                    <!-- Item 1: NIFTY -->
+                    <div id="NIFTY 50" data-price="19875.25" class="watchlist-item flex justify-between items-center text-sm p-1 hover:bg-gray-900 rounded-md cursor-pointer border border-transparent hover:border-teal-500/50">
+                        <div>
+                            <p class="font-bold">NIFTY 50</p>
+                            <p class="text-xs text-secondary-gray">19,875.25</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-green">+1.24%</p>
+                            <!-- Tiny Sparkline Placeholder -->
+                            <div class="h-4 w-12 bg-green-900 rounded-sm mt-1" style="background: repeating-linear-gradient(90deg, var(--green), var(--green) 3px, transparent 3px, transparent 5px);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Item 2: BANKNIFTY -->
+                    <div id="BANKNIFTY" data-price="45120.90" class="watchlist-item flex justify-between items-center text-sm p-1 hover:bg-gray-900 rounded-md cursor-pointer border border-transparent hover:border-teal-500/50">
+                        <div>
+                            <p class="font-bold">BANKNIFTY</p>
+                            <p class="text-xs text-secondary-gray">45,120.90</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-red">-0.55%</p>
+                            <!-- Tiny Sparkline Placeholder -->
+                            <div class="h-4 w-12 bg-red-900 rounded-sm mt-1" style="background: repeating-linear-gradient(-90deg, var(--red), var(--red) 3px, transparent 3px, transparent 5px);"></div>
+                        </div>
+                    </div>
+                     <!-- Item 3: User Stock -->
+                    <div id="RELIANCE" data-price="2510.50" class="watchlist-item flex justify-between items-center text-sm p-1 hover:bg-gray-900 rounded-md cursor-pointer border border-transparent hover:border-teal-500/50">
+                        <div>
+                            <p class="font-bold">RELIANCE</p>
+                            <p class="text-xs text-secondary-gray">2,510.50</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-green">+2.11%</p>
+                            <!-- Tiny Sparkline Placeholder -->
+                            <div class="h-4 w-12 bg-green-900 rounded-sm mt-1" style="background: repeating-linear-gradient(90deg, var(--green), var(--green) 3px, transparent 3px, transparent 5px);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 2: Charting, AI, and Algo Monitoring (7/12 Width) -->
+        <div class="col-span-12 md:col-span-7 flex flex-col space-y-4">
+            
+            <!-- Advanced Charting Module (Central/Dominant) -->
+            <div class="card flex-grow relative">
+                <h2 id="chart-title" class="text-xl font-semibold mb-2">NIFTY 50 (5-min)</h2>
+
+                <!-- AI Widget (Dashboard Entry Point) - III. B -->
+                <div class="absolute top-4 right-4 z-10 card bg-gray-900/70 p-3 w-64 border-2 border-red-700/50 hover:border-red-600 cursor-pointer transition-all" onclick="showAIScreen()">
+                    <h3 class="text-lg font-bold">
+                        <span class="accent-text">Edge Finder AI</span>
+                        <span class="text-xs text-red-400 border border-red-400/50 px-2 py-0.5 ml-2 rounded-full glowing-tag">New Insights Available</span>
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">Your trades from the last 3 months contain 3 distinct profit patterns. Quantify your edge now!</p>
+                    <button class="w-full mt-2 btn-primary rounded-lg py-1.5 text-xs">
+                        [UNLOCK MY EDGE]
+                    </button>
+                </div>
+                
+                <!-- Chart Placeholder with TA Indicators -->
+                <div id="chart-area" class="h-[70%] bg-gray-900 border border-gray-800 flex items-center justify-center relative rounded-lg" style="background: linear-gradient(to right, #1a1a1a 1px, transparent 1px) 0 0, linear-gradient(to bottom, #1a1a1a 1px, transparent 1px) 0 0; background-size: 20px 20px;">
+                    <p class="text-gray-600 text-sm">Candlestick Chart Area (Implied)</p>
+                    <p class="absolute bottom-2 left-2 text-xs text-gray-500">TA Overlays: RSI (bottom), MACD (below chart)</p>
+                    
+                    <!-- Quick Modify Radial Menu (Simulated UX Enhancement - II. 2) -->
+                    <div id="radial-menu">
+                        <span class="radial-menu-item accent-text">Buy @ Limit</span>
+                        <span class="radial-menu-item">Modify SL</span>
+                        <span class="radial-menu-item text-red-500">Square Off</span>
+                    </div>
+
+                </div>
+                
+                <!-- IV. B - Live Algo Monitoring Card (Below Chart) -->
+                <div class="mt-4 card p-3 bg-gray-900 border-gray-800">
+                    <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+                        <h3 class="text-lg font-bold">Edge Algo: Time-Boxed Scalp</h3>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xs font-bold text-green-400 border border-green-400/50 px-2 py-0.5 rounded-full">LIVE (Running)</span>
+                            <!-- ON/OFF Toggle Switch -->
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" value="" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-2">
+                        <div>
+                            <p class="text-sm text-gray-400">P&L Today:</p>
+                            <p class="text-xl font-bold text-green-400">+₹ 1,850.25</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400 text-right">Total P&L:</p>
+                            <p class="text-xl font-bold text-green-400 text-right">+₹ 15,200.00</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs text-gray-400 h-10 overflow-y-scroll border-t border-gray-800 pt-2">
+                        <p>10:15:00 → Auto Exit Triggered (Booked +₹300)</p>
+                        <p class="accent-text">09:30:00 → Edge Condition Met → Market Order Sent (400 QTY)</p>
+                        <p>09:15:00 → Algo Start</p>
+                    </div>
+                    <div class="flex space-x-3 mt-3">
+                        <button class="flex-1 py-1 text-sm bg-red-800/50 text-red-400 rounded-lg transition-all hover:bg-red-700/70">[PAUSE & REFINE]</button>
+                        <button class="flex-1 py-1 text-sm btn-secondary rounded-lg transition-all hover:bg-teal-900/30">[VIEW ANALYTICS]</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Column 3: Order Panel, Risk, and Strategic Positioning (3/12 Width) -->
+        <div class="col-span-12 md:col-span-3 flex flex-col space-y-4 overflow-y-auto">
+
+            <!-- Order Entry Panel (II. 3) -->
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-3">Order Entry</h2>
+                <div class="space-y-3">
+                    <select id="instrument-selector" class="w-full p-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                        <option value="NIFTY 50|19875.25">NIFTY 50 F&O (1 Lot)</option>
+                        <option value="BANKNIFTY|45120.90">BANKNIFTY F&O (1 Lot)</option>
+                        <option value="RELIANCE|2510.50">RELIANCE (100 QTY)</option>
+                    </select>
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-green-700/50 text-green-400 py-2 rounded-lg font-bold hover:bg-green-600/70 transition-all">BUY</button>
+                        <button class="flex-1 bg-red-700/50 text-red-400 py-2 rounded-lg font-bold hover:bg-red-600/70 transition-all">SELL</button>
+                    </div>
+                    
+                    <input type="number" placeholder="Quantity (e.g., 50)" class="w-full p-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                    
+                    <select class="w-full p-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                        <option>Order Type: Market</option>
+                        <option>Order Type: Limit</option>
+                        <option>Order Type: SL-M</option>
+                    </select>
+                    
+                    <button class="w-full py-2 rounded-lg btn-primary">PLACE ORDER</button>
+                    <button class="w-full py-2 rounded-lg btn-secondary" onclick="showStrategyBuilder()">
+                        Strategy Builder (Options)
+                    </button>
+
+                    <!-- GEMINI API INTEGRATION: Strategy Scout -->
+                    <button id="strategy-scout-btn" class="w-full py-2 rounded-lg bg-teal-800/50 text-teal-400 font-bold transition-all hover:bg-teal-700/70" onclick="generateTradeStrategy()">
+                        Strategy Scout ✨ (AI Gen)
+                    </button>
+                    
+                    <div id="ai-strategy-output" class="p-3 bg-gray-900 border border-teal-800 rounded-lg hidden">
+                        <p class="text-sm font-semibold accent-text mb-2 flex items-center space-x-2">
+                            <span>AI Strategy for <span id="strategy-symbol"></span></span>
+                            <span id="loading-indicator" class="hidden loading-spinner"></span>
+                        </p>
+                        <div id="strategy-content" class="text-xs space-y-1">
+                            <!-- Strategy content will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IV. A - Portfolio Circuit Breaker Module -->
+            <div class="card">
+                <h2 class="text-lg font-bold text-red-400/90 mb-3">Global Risk Management</h2>
+                <div class="space-y-3">
+                    <p class="text-sm text-secondary-gray">Daily Portfolio Drawdown Limit:</p>
+                    <input type="text" value="−5,000 or 3% Equity" class="w-full p-2 rounded-lg bg-gray-900 border border-red-700 text-sm font-semibold text-red-400">
+                    
+                    <p class="text-sm text-secondary-gray mt-3">Breaker Action:</p>
+                    <select class="w-full p-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                        <option>Square Off All Positions</option>
+                        <option>Pause All Algos</option>
+                        <option>Only Notify</option>
+                    </select>
+                    <button class="w-full py-2 rounded-lg bg-red-600/70 text-white font-bold mt-3 hover:bg-red-700 transition-all">APPLY CIRCUIT BREAKER</button>
+                </div>
+            </div>
+
+            <!-- V. Visual Summary of Business Impact -->
+            <div class="card flex-grow">
+                <h2 class="text-lg font-bold mb-3">Strategic Impact Metrics</h2>
+                <div class="h-40 flex justify-around items-end space-x-4">
+                    <!-- Bar 1: Engagement -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 bg-gradient-to-t from-teal-500 to-blue-500 rounded-t-lg h-[80%] relative">
+                            <span class="absolute top-[-20px] left-1/2 transform -translate-x-1/2 text-sm font-bold text-teal-400">↑40%</span>
+                        </div>
+                        <p class="mt-2 text-xs text-secondary-gray">Engagement</p>
+                    </div>
+                    <!-- Bar 2: Retention -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 bg-gradient-to-t from-teal-500 to-blue-500 rounded-t-lg h-[62.5%] relative">
+                            <span class="absolute top-[-20px] left-1/2 transform -translate-x-1/2 text-sm font-bold text-teal-400">↑25%</span>
+                        </div>
+                        <p class="mt-2 text-xs text-secondary-gray">Retention</p>
+                    </div>
+                    <!-- Bar 3: Revenue -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 bg-gradient-to-t from-teal-500 to-blue-500 rounded-t-lg h-[50%] relative">
+                            <span class="absolute top-[-20px] left-1/2 transform -translate-x-1/2 text-sm font-bold text-teal-400">↑15%</span>
+                        </div>
+                        <p class="mt-2 text-xs text-secondary-gray">Revenue</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal definitions for Strategy Builder and AI Workflow remain here... -->
+    <!-- III. A - Multi-Leg Strategy Builder Module (Overlay Modal) -->
+    <div id="strategy-builder-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4">
+        <div class="card w-full max-w-6xl h-[90vh] bg-gray-900 p-6 flex flex-col">
+            <h2 class="text-3xl font-bold mb-4 accent-text border-b border-teal-800 pb-2">Multi-Leg Strategy Builder</h2>
+            <div class="flex-grow grid grid-cols-2 gap-6 overflow-hidden">
+                
+                <!-- Left Pane: Strategy Builder (Interactive) -->
+                <div class="flex flex-col space-y-4 overflow-y-auto pr-2">
+                    <div class="flex justify-between items-center text-sm">
+                        <h3 class="text-lg font-semibold text-white">Strategy Legs</h3>
+                        <div class="flex space-x-2 text-gray-500">
+                            <button class="hover:text-white" title="Undo">↶</button>
+                            <button class="hover:text-white" title="Redo">↷</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Leg 1 Card -->
+                    <div class="card bg-gray-800 p-4 border-2 border-teal-600">
+                        <h4 class="font-bold text-teal-400 mb-2">Leg 1: Buy Call (Long)</h4>
+                        <input type="text" placeholder="Instrument/Strike Price" value="NIFTY 20000 CE (Implied Drag Target)" class="w-full p-2 mb-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                        <div class="flex space-x-2">
+                            <input type="number" placeholder="Qty" value="50" class="flex-1 p-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                            <select class="flex-1 p-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                                <option>Market</option>
+                                <option>Limit @ 120.50</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Leg 2 Card -->
+                    <div class="card bg-gray-800 p-4">
+                        <h4 class="font-bold text-red-400 mb-2">Leg 2: Sell Put (Short)</h4>
+                        <input type="text" placeholder="Instrument/Strike Price" value="BANKNIFTY 45100 PE" class="w-full p-2 mb-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                        <div class="flex space-x-2">
+                            <input type="number" placeholder="Qty" value="100" class="flex-1 p-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                            <select class="flex-1 p-2 rounded-lg bg-gray-900 border border-gray-700 text-sm">
+                                <option>Market</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Smart Automation Toggle -->
+                    <div class="flex justify-between items-center mt-4 p-3 bg-gray-700 rounded-lg">
+                        <label class="font-semibold text-sm">Auto Exit Rules (Smart Automation)</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 pl-1">Current Rule: Set SL @ 25% Premium Loss | Target @ 50% Profit</p>
+                </div>
+
+                <!-- Right Pane: Dynamic Visualization & Risk Metrics -->
+                <div class="flex flex-col space-y-4">
+                    
+                    <!-- Payoff Graph -->
+                    <div class="flex-grow card bg-gray-800 p-4 flex items-center justify-center relative">
+                        <h3 class="absolute top-2 left-2 font-bold text-white">Dynamic Payoff Graph (P&L Curve)</h3>
+                        <!-- Graph Simulation -->
+                        <div class="w-full h-full border border-gray-700 rounded-lg" style="background: linear-gradient(to top right, transparent 50%, rgba(0, 255, 255, 0.3)), linear-gradient(to top left, transparent 50%, rgba(0, 255, 0, 0.3)); clip-path: polygon(0 50%, 20% 50%, 40% 70%, 60% 30%, 80% 50%, 100% 50%, 100% 100%, 0 100%);"></div>
+                    </div>
+
+                    <!-- Risk Metrics Widget -->
+                    <div class="card bg-gray-800 p-4 grid grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <p class="text-xs text-secondary-gray">Max Loss</p>
+                            <p class="text-xl font-extrabold text-red-500">−₹ 3,500</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-secondary-gray">Margin Required</p>
+                            <p class="text-xl font-extrabold accent-text">₹ 65,000</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-secondary-gray">Breakeven Points</p>
+                            <p class="text-xl font-extrabold text-yellow-500">20100 / 19950</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Deployment CTA -->
+                    <div class="flex space-x-4 pt-2">
+                        <button class="flex-1 py-3 text-lg bg-orange-500 text-white rounded-xl font-bold transition-all hover:bg-orange-600">[DEPLOY AS PAPER-TRADE]</button>
+                        <button class="flex-1 py-3 text-lg bg-green-500 text-white rounded-xl font-bold transition-all hover:bg-green-600">[DEPLOY LIVE ALGO]</button>
+                    </div>
+                </div>
+
+            </div>
+            
+            <button class="absolute top-4 right-4 text-3xl text-white hover:text-red-500 transition-all" onclick="hideStrategyBuilder()">
+                &times;
+            </button>
+        </div>
+    </div>
+
+
+    <!-- III. C & D - Edge Finder AI Workflow Screens (Simulated/Implied) -->
+    <div id="ai-workflow-modal" class="hidden fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center p-4">
+        <div class="card w-full max-w-7xl h-[90vh] bg-gray-900 p-8 flex flex-col">
+            <h2 class="text-3xl font-bold mb-6 accent-text border-b border-teal-800 pb-3">Edge Finder AI: Pattern Discovery & Deployment</h2>
+            <div class="flex-grow grid grid-cols-5 gap-8 overflow-hidden">
+                
+                <!-- Left: Pattern Discovery (Insights) -->
+                <div class="col-span-2 flex flex-col space-y-4 overflow-y-auto pr-4">
+                    
+                    <h3 class="text-xl font-semibold mb-2 text-white">AI-Driven Insights (Select Your Edge)</h3>
+                    
+                    <!-- Insight Card 1 (Selected) -->
+                    <div class="card bg-gray-800 p-4 border-2 border-teal-500">
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-lg font-bold text-teal-400">Time-Boxed Volatility Capture</h4>
+                            <span class="text-3xl font-extrabold text-green-500">82%</span>
+                        </div>
+                        <p class="text-xs text-secondary-gray">Win Rate</p>
+                        <p class="mt-3 text-sm text-gray-300">Rule Logic: Entry after 9:30 AM AND Exit before 10:15 AM (Scalping)</p>
+                        <button class="w-full mt-3 py-2 bg-teal-600 text-white rounded-lg font-bold">
+                            Selected Edge
+                        </button>
+                    </div>
+                    
+                    <!-- Insight Card 2 -->
+                    <div class="card bg-gray-800 p-4">
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-lg font-bold">RSI Divergence Mean Reversion</h4>
+                            <span class="text-3xl font-extrabold text-green-500">71%</span>
+                        </div>
+                        <p class="text-xs text-secondary-gray">Win Rate</p>
+                        <p class="mt-3 text-sm text-gray-300">Rule Logic: Entry when RSI crosses 30 and MACD is above signal line.</p>
+                        <button class="w-full mt-3 py-2 btn-secondary rounded-lg font-bold hover:bg-teal-900/50">
+                            [Select Edge]
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Right: Chart Context & Backtest Simulation -->
+                <div class="col-span-3 flex flex-col space-y-6">
+                    
+                    <!-- Contextual Chart -->
+                    <div class="card flex-grow h-1/2 relative">
+                        <h3 class="text-lg font-bold mb-2">Contextual Trade Highlighting</h3>
+                        <div class="h-[calc(100%-40px)] bg-gray-900 border border-gray-800 flex items-center justify-center relative rounded-lg">
+                            <p class="text-gray-600 text-sm">NIFTY 50 Chart dynamically highlighting successful trades with green markers.</p>
+                            <span class="absolute top-2 right-2 text-xs text-teal-400">AI Suggestion: Smart Target Price @ 19,950</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Backtest Simulation & Deployment (III. D) -->
+                    <div class="card h-1/2 p-4 bg-gray-800">
+                        <h3 class="text-xl font-bold mb-4 accent-text">Backtest Simulation Results</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            
+                            <!-- Equity Curve Chart -->
+                            <div class="relative h-40 bg-gray-900 border border-gray-700 rounded-lg flex items-center justify-center">
+                                <h4 class="font-semibold text-white absolute top-2 left-2">Equity Curve</h4>
+                                <p class="text-gray-500 text-xs absolute bottom-2 left-2">Max Drawdown: -4.5%</p>
+                                <!-- Upward Trend Simulation -->
+                                <svg width="90%" height="70%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <polyline fill="none" stroke="#2ECC40" stroke-width="2" points="0,90 20,80 40,75 60,60 80,40 100,10" />
+                                </svg>
+                            </div>
+                            
+                            <!-- Metrics Panel -->
+                            <div class="space-y-2">
+                                <div class="p-2 bg-gray-900 rounded-lg flex justify-between items-center">
+                                    <span class="text-sm text-secondary-gray">AI Confidence Score:</span>
+                                    <span class="text-2xl font-extrabold text-green-500">7.8/10</span>
+                                </div>
+                                <div class="p-2 bg-gray-900 rounded-lg flex justify-between items-center">
+                                    <span class="text-sm text-secondary-gray">Max Drawdown:</span>
+                                    <span class="text-lg font-bold text-red-500">−₹ 8,500</span>
+                                </div>
+                                <div class="p-2 bg-gray-900 rounded-lg flex justify-between items-center">
+                                    <span class="text-sm text-secondary-gray">Max Profit:</span>
+                                    <span class="text-lg font-bold text-green-500">+₹ 45,200</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Slippage Model: Realistic applied.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Deployment CTAs -->
+                        <div class="flex space-x-4 mt-6">
+                            <button class="flex-1 py-3 text-lg bg-orange-500 text-white rounded-xl font-bold transition-all hover:bg-orange-600">[DEPLOY AS PAPER-TRADE]</button>
+                            <button class="flex-1 py-3 text-lg bg-green-500 text-white rounded-xl font-bold transition-all hover:bg-green-600">[DEPLOY LIVE ALGO]</button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            
+            <button class="absolute top-4 right-4 text-3xl text-white hover:text-red-500 transition-all" onclick="hideAIScreen()">
+                &times;
+            </button>
+        </div>
+    </div>
+    
+    <!-- A. Onboarding Experience Modal (Conceptual/Implied Visuals) - Mobile First Design -->
+    <div id="onboarding-modal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-[60] flex items-center justify-center p-4">
+        <div class="card w-full max-w-sm h-auto bg-gray-900 p-6 flex flex-col">
+            <h3 class="text-sm font-semibold text-teal-400 mb-2">KYC Setup</h3>
+            
+            <!-- Progress Bar -->
+            <div class="w-full h-2 bg-gray-700 rounded-full mb-6">
+                <div class="h-full bg-teal-500 rounded-full" style="width: 66.6%;"></div>
+            </div>
+            <p class="text-xl font-bold mb-4">Activate Trading Segments (Step 4/6)</p>
+
+            <div class="space-y-4">
+                <!-- Segment 1: Cash -->
+                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                    <label for="cash" class="text-white font-medium">Cash & Equity (Mandatory)</label>
+                    <input type="checkbox" id="cash" checked disabled class="w-4 h-4 text-teal-600 bg-gray-700 border-gray-600 rounded">
+                </div>
+                
+                <!-- Segment 2: F&O/Derivatives with Tooltip UX Enhancement -->
+                <div class="relative flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                    <label for="fno" class="text-white font-medium flex items-center space-x-2">
+                        <span>F&O / Derivatives</span>
+                        <span id="fno-info" class="text-teal-400 text-sm font-bold cursor-pointer hover:text-white" title="Unlock Leverage & Advanced Strategies">i</span>
+                    </label>
+                    <input type="checkbox" id="fno" class="w-4 h-4 text-teal-600 bg-gray-700 border-gray-600 rounded">
+
+                    <!-- Tooltip Bubble (Hidden by default, shown on hover/click of 'i') -->
+                    <div id="fno-tooltip" class="hidden absolute left-full ml-4 top-1/2 transform -translate-y-1/2 w-64 p-3 rounded-lg bg-teal-900 border border-teal-600 shadow-xl z-10">
+                        <h5 class="font-bold text-teal-400 mb-1">Unlock Leverage & Advanced Strategies</h5>
+                        <p class="text-xs text-white/80">Activate F&O to access options trading, futures, and the **Edge Finder AI** strategy automation tools.</p>
+                        <div class="absolute left-[-8px] top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-t-transparent border-b-transparent border-r-teal-600"></div>
+                    </div>
+                </div>
+
+                <!-- Segment 3: Currency -->
+                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                    <label for="currency" class="text-white font-medium">Currency & Commodities</label>
+                    <input type="checkbox" id="currency" class="w-4 h-4 text-teal-600 bg-gray-700 border-gray-600 rounded">
+                </div>
+            </div>
+
+            <button class="w-full py-2 rounded-lg btn-primary mt-6">CONTINUE TO STEP 5</button>
+            <button class="w-full py-1 text-sm text-gray-400 mt-2 hover:text-white" onclick="hideOnboardingModal()">Back to Dashboard</button>
+        </div>
+    </div>
+
+
+    <script>
+        // Global state for selected instrument
+        let currentInstrument = {
+            symbol: "NIFTY 50",
+            price: "19875.25"
+        };
+        
+        // --- GEMINI API HELPERS ---
+        const MODEL_NAME = 'gemini-2.5-flash-preview-05-20';
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
+
+        /**
+         * Fetches data with exponential backoff retry logic.
+         */
+        async function exponentialBackoffFetch(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status !== 429 && response.ok) {
+                        return response;
+                    }
+                    if (response.status === 429 && i < maxRetries - 1) {
+                        // Rate limit hit, wait longer
+                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    }
+                    // Handle non-rate limit errors or final rate limit failure
+                    const errorBody = await response.text();
+                    console.error(`API Error: Status ${response.status}`, errorBody);
+                    throw new Error(`API request failed with status ${response.status}`);
+                } catch (error) {
+                    if (i === maxRetries - 1) {
+                        throw error;
+                    }
+                }
+            }
+        }
+        
+        /**
+         * Calls the Gemini API to generate a structured trade strategy.
+         */
+        async function generateTradeStrategy() {
+            const outputDiv = document.getElementById('ai-strategy-output');
+            const contentDiv = document.getElementById('strategy-content');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const symbolSpan = document.getElementById('strategy-symbol');
+            const strategyBtn = document.getElementById('strategy-scout-btn');
+            
+            outputDiv.classList.remove('hidden');
+            contentDiv.innerHTML = '';
+            loadingIndicator.classList.remove('hidden');
+            strategyBtn.disabled = true;
+            strategyBtn.textContent = 'Analyzing Market...';
+
+            symbolSpan.textContent = currentInstrument.symbol;
+            
+            // Define the structured JSON output we want from the LLM
+            const jsonSchema = {
+                type: "OBJECT",
+                properties: {
+                    direction: { type: "STRING", description: "The recommended trade direction: LONG or SHORT." },
+                    entry: { type: "NUMBER", description: "The suggested entry price based on the current price." },
+                    target: { type: "NUMBER", description: "The suggested target price." },
+                    stopLoss: { type: "NUMBER", description: "The suggested stop loss price." },
+                    rationale: { type: "STRING", description: "A brief, technical rationale (2-3 sentences max) for the suggested trade." }
+                },
+                required: ["direction", "entry", "target", "stopLoss", "rationale"]
+            };
+
+            const userQuery = `Analyze the current price action for ${currentInstrument.symbol} at ${currentInstrument.price}. Generate a structured, short-term (intraday 5-min chart) trade strategy.`;
+            const systemPrompt = "Act as a veteran quantitative trading analyst. Provide a concise, structured trade strategy based on technical analysis and price action for the given symbol and price. Ensure the entry, target, and stop loss values are realistic and derived from the provided price. Format all numeric values to two decimal places.";
+            
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: jsonSchema,
+                    temperature: 0.5,
+                },
+                tools: [{ "google_search": {} }], // Use Google Search for up-to-date context
+            };
+            
+            try {
+                const response = await exponentialBackoffFetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (!jsonText) {
+                    throw new Error("Received empty or invalid response from AI.");
+                }
+
+                const strategy = JSON.parse(jsonText);
+                
+                // Render the structured strategy to the UI
+                contentDiv.innerHTML = `
+                    <p><span class="text-teal-400 font-bold">${strategy.direction.toUpperCase()} SIGNAL</span></p>
+                    <p class="text-xs text-gray-300"><span class="font-bold">Entry:</span> ${strategy.entry.toFixed(2)}</p>
+                    <p class="text-xs text-gray-300"><span class="font-bold">Target:</span> ${strategy.target.toFixed(2)}</p>
+                    <p class="text-xs text-gray-300"><span class="font-bold">S/L:</span> ${strategy.stopLoss.toFixed(2)}</p>
+                    <p class="mt-2 text-xs text-gray-400 italic">"${strategy.rationale}"</p>
+                `;
+
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                contentDiv.innerHTML = '<p class="text-red-400 text-xs">AI analysis failed. Please try again or check your network connection.</p>';
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                strategyBtn.disabled = false;
+                strategyBtn.textContent = 'Strategy Scout ✨ (AI Gen)';
+            }
+        }
+        
+        // --- UI UTILITY FUNCTIONS (Existing) ---
+        
+        /**
+         * Updates the global instrument context and UI on selection change.
+         */
+        function updateInstrumentContext(selector) {
+            const [symbol, price] = selector.value.split('|');
+            currentInstrument.symbol = symbol.trim();
+            currentInstrument.price = price.trim();
+            document.getElementById('chart-title').textContent = `${currentInstrument.symbol} (5-min)`;
+            
+            // Highlight selected item in watchlist (basic simulation)
+            document.querySelectorAll('.watchlist-item').forEach(item => {
+                item.style.borderColor = 'transparent';
+            });
+            const selectedItem = document.getElementById(currentInstrument.symbol.split(' ')[0]);
+            if(selectedItem) {
+                selectedItem.style.borderColor = 'var(--accent-teal)';
+            }
+        }
+
+        // Initialize context on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const selector = document.getElementById('instrument-selector');
+            selector.addEventListener('change', (e) => updateInstrumentContext(e.target));
+            updateInstrumentContext(selector); // Initial call
+        });
+
+        // II. 2 - Simulate Quick Modify Radial Menu on Chart Interaction
+        const chartArea = document.getElementById('chart-area');
+        const radialMenu = document.getElementById('radial-menu');
+
+        chartArea.addEventListener('click', (e) => {
+            if (e.target.closest('.card') && e.target.closest('.card').classList.contains('bg-gray-900/70')) {
+                return;
+            }
+            radialMenu.style.display = 'flex';
+            const rect = chartArea.getBoundingClientRect();
+            radialMenu.style.left = `${e.clientX - rect.left - 60}px`;
+            radialMenu.style.top = `${e.clientY - rect.top - 60}px`;
+            setTimeout(() => {
+                radialMenu.style.display = 'none';
+            }, 3000);
+        });
+        
+        // III. A - Strategy Builder Modal Controls
+        function showStrategyBuilder() {
+            document.getElementById('strategy-builder-modal').classList.remove('hidden');
+        }
+        function hideStrategyBuilder() {
+            document.getElementById('strategy-builder-modal').classList.add('hidden');
+        }
+
+        // III. B, C, D - AI Workflow Modal Controls
+        function showAIScreen() {
+            document.getElementById('ai-workflow-modal').classList.remove('hidden');
+        }
+        function hideAIScreen() {
+            document.getElementById('ai-workflow-modal').classList.add('hidden');
+        }
+
+        // A. Onboarding Modal Controls
+        function showOnboardingModal() {
+            document.getElementById('onboarding-modal').classList.remove('hidden');
+        }
+        function hideOnboardingModal() {
+            document.getElementById('onboarding-modal').classList.add('hidden');
+        }
+
+        // A. Onboarding Tooltip Logic
+        const fnoInfo = document.getElementById('fno-info');
+        const fnoTooltip = document.getElementById('fno-tooltip');
+
+        fnoInfo.addEventListener('mouseenter', () => {
+            fnoTooltip.classList.remove('hidden');
+        });
+        fnoInfo.addEventListener('mouseleave', () => {
+            fnoTooltip.classList.add('hidden');
+        });
+
+        // Hide menus if clicked outside (a simple implementation)
+        document.addEventListener('click', (e) => {
+            if (radialMenu.style.display === 'flex' && !chartArea.contains(e.target)) {
+                radialMenu.style.display = 'none';
+            }
+        });
+
+    </script>
+</body>
+</html>
