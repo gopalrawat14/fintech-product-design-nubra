@@ -67,7 +67,7 @@ The work reflects a **blend of product thinking, technical feasibility, and crea
 ## 🤝 Connect & Collaborate  
 
 📧 gopalrawwatt@gmail.com  
-💼 [LinkedIn](https://www.linkedin.com/) *([Add your profile link here](https://www.linkedin.com/in/gopalrawat/))*  
+💼 [LinkedIn]([https://www.linkedin.com/](https://www.linkedin.com/in/gopalrawat/))
 
 ⭐ If you find this project insightful, consider starring the repo!  
 
